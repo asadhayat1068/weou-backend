@@ -14,6 +14,15 @@ nftCollection.contract.on(
   nftCollection.Events.Transfer,
   nftCollection.Transfer_handler
 );
+nftCollection.contract.on(
+  nftCollection.Events.TransferCheck,
+  nftCollection.TransferCheck_handler
+);
+nftCollection.contract.on(
+  nftCollection.Events.TxData,
+  nftCollection.TxData_handler
+);
+
 console.log("Listening to events", nftCollection.contract.address);
 
 // wss_provider.on("block", (blockNumber) => {
