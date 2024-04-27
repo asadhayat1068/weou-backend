@@ -1,10 +1,13 @@
+import "reflect-metadata";
 import { app } from "./app";
 import { logger } from "./util";
-import { wss_provider } from "./config";
+import { AppDataSource, wss_provider } from "./config";
 import * as nftCollection from "./providers/nft-contract";
 import { Events } from "./providers";
 import { OpenSeaClient } from "./providers";
 import { LotteryService } from "./services/lottery.service";
+import { DataSource } from "typeorm";
+
 const lotteryService = new LotteryService();
 
 // Auction contract Events Listeners
@@ -32,6 +35,15 @@ OpenSeaClient.onItemSold("cssnftcollection-2", (item) => {
   console.log(JSON.stringify(item, null, 4));
   // lotteryService.processSale(item);
 });
+
+// Connect to the database
+AppDataSource.connect()
+  .then(() => {
+    logger.info("DATABASE_CONNECTED", "Database connected successfully");
+  })
+  .catch((error) => {
+    logger.error("DATABASE_CONNECTION_ERROR", error);
+  });
 
 // Start the server
 const server = app.listen(process.env.PORT || app.get("port"), () => {
