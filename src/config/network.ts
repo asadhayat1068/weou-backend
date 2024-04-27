@@ -10,3 +10,7 @@ export const wss_provider = new ethers.providers.WebSocketProvider(
 );
 
 export const COLLECTION_ADDRESS = process.env.COLLECTION_ADDRESS || "";
+export const OPENSEA_API_KEY = process.env.OPENSEA_API_KEY || "";
+
+export const SECRET_TRANSACTION = "3d";
+export const SECRET_WALLET = "35";

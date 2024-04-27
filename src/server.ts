@@ -3,6 +3,9 @@ import { logger } from "./util";
 import { wss_provider } from "./config";
 import * as nftCollection from "./providers/nft-contract";
 import { Events } from "./providers";
+import { OpenSeaClient } from "./providers";
+import { LotteryService } from "./services/lottery.service";
+const lotteryService = new LotteryService();
 
 // Auction contract Events Listeners
 // auction_contract.on(AuctionEvents.AuctionCreated, AuctionCreated_handler);
@@ -10,7 +13,7 @@ import { Events } from "./providers";
 // auction_contract.on(AuctionEvents.BuyBids, BuyBids_handler);
 // auction_contract.on(AuctionEvents.EndAuction, EndAuction_handler);
 // Token contract Events Listeners
-nftCollection.contract.on(
+/*nftCollection.contract.on(
   nftCollection.Events.Transfer,
   nftCollection.Transfer_handler
 );
@@ -24,10 +27,11 @@ nftCollection.contract.on(
 );
 
 console.log("Listening to events", nftCollection.contract.address);
-
-// wss_provider.on("block", (blockNumber) => {
-//   logger.info("NEW BLOCK", blockNumber);
-// });
+*/
+OpenSeaClient.onItemSold("cssnftcollection-2", (item) => {
+  console.log(JSON.stringify(item, null, 4));
+  // lotteryService.processSale(item);
+});
 
 // Start the server
 const server = app.listen(process.env.PORT || app.get("port"), () => {
