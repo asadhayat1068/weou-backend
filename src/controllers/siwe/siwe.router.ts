@@ -1,7 +1,6 @@
 import express from "express";
 import { SIWEController } from "./siwe.controller";
 
-export const HelloRouter = express.Router();
+export const SIWERouter = express.Router();
 
-HelloRouter.get("/", [SIWEController.sayHello]);
-HelloRouter.post("/webhook", [SIWEController.catchHook]);
+SIWERouter.get("/nonce", [SIWEController.getNonce]);
