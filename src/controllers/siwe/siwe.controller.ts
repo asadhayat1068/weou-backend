@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { SuccessResponse } from "../../util";
+import { InternalErrorResponse, SuccessResponse } from "../../util";
 import { SiweMessage, generateNonce } from "siwe";
 
 export class SIWEController {
@@ -23,14 +23,24 @@ export class SIWEController {
   }
 
   static async verifyMessage(req: Request, res: Response) {
-    const { message, signature } = req.body;
-    const siweMessage = new SiweMessage(message);
+    const { message, signature, account } = req.body;
+    // console.log({ message, signature, account });
     try {
-      const v = await siweMessage.verify({ signature });
+      const siweMessage = new SiweMessage(message);
+      const v = await siweMessage.verify({
+        signature,
+      });
       console.log("Verify Result:", v);
-      res.send(true);
-    } catch {
-      res.send(false);
+      //   res.send(true);
+      const response = new SuccessResponse(res, "Verify.", {
+        message,
+        signature,
+        account,
+      });
+      response.send();
+    } catch (e) {
+      const response = new SuccessResponse(res, "Internal Error", e);
+      response.send();
     }
   }
 }
