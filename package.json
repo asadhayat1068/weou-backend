@@ -2,7 +2,7 @@
   "name": "crypto-sweep-stakes",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/server.js",
   "scripts": {
     "build": "rm -rf build && tsc",
     "debug": "npm run build && npm run watch-debug",
@@ -42,6 +42,7 @@
     "@types/joi": "^17.2.3",
     "@types/uuid": "^9.0.1",
     "applicationinsights": "^2.6.0",
+    "aws-sdk": "^2.1643.0",
     "axios": "^1.4.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",

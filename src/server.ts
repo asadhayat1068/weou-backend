@@ -17,10 +17,16 @@ nftCollection.contract.on(
   nftCollection.Transfer_handler
 );
 
-OwnershipService.getTokensByOwner(
-  "0x2883a414A19CDAd4f9fC33DB4c072B04a7d61008"
-).then((tokens) => {
-  console.log({ tokens });
+// OwnershipService.getTokensByOwner(
+//   "0xFf6b07070a9C34Bf9955D55Bd360308be1009735"
+// ).then((tokens) => {
+//   console.log({ tokens });
+// });
+
+LotteryService.getSalesByAddress(
+  "0xff6b07070a9c34bf9955d55bd360308be1009735"
+).then((sales) => {
+  console.log({ sales });
 });
 
 OpenSeaClient.onItemSold("cssnftcollection-2", (item) => {

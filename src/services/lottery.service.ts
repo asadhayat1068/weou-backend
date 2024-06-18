@@ -1,5 +1,6 @@
 import { SECRET_TRANSACTION, SECRET_WALLET, dynamoDB } from "../config";
 import { logger } from "../util";
+import { formatKey } from "../util/helpers";
 import { BaseService } from "./base-service";
 
 export interface LotteryResult {
@@ -66,8 +67,8 @@ export class LotteryService extends BaseService {
     to: string,
     result: LotteryResult
   ) {
-    const pk = `SALE#${to}`;
-    const sk = `TX#${transactionHash}`;
+    const pk = formatKey(`SALE#${to}`);
+    const sk = formatKey(`TX#${transactionHash}`);
     const params = {
       TableName: "weou",
       Item: {
@@ -88,14 +89,18 @@ export class LotteryService extends BaseService {
     }
   }
 
-  public async getSalesByAddress(address: string) {
+  public static async getSalesByAddress(address: string) {
     const params = {
       TableName: "weou",
-      KeyConditionExpression: "pk = :pk",
+      KeyConditionExpression: "#pk = :pk",
+      ExpressionAttributeNames: {
+        "#pk": "pk",
+      },
       ExpressionAttributeValues: {
-        ":pk": `SALE#${address}`,
+        ":pk": formatKey(`SALE#${address}`),
       },
     };
+    console.log(params);
     try {
       const response = await dynamoDB.query(params).promise();
       return response.Items;
