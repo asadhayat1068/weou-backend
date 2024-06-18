@@ -1,7 +1,7 @@
 import { ZeroAddress } from "ethers";
 import { dynamoDB } from "../config";
 import { BaseService } from "./base-service";
-import { logger } from "../util";
+import { formatKey, logger } from "../util";
 
 export class OwnershipService extends BaseService {
   /**
@@ -15,10 +15,10 @@ export class OwnershipService extends BaseService {
     const params = {
       TableName: "weou",
       Item: {
-        pk: `owner#${to}`,
-        sk: `token#${tokenId}`,
-        token_id: tokenId,
-        token_owner: to,
+        pk: formatKey(`owner#${to}`),
+        sk: formatKey(`token#${tokenId}`),
+        tokenId,
+        tokenOwner: to,
         timestamp,
       },
       ReturnValues: "NONE",

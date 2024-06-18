@@ -78,6 +78,7 @@ export class LotteryService extends BaseService {
         from,
         to,
         result,
+        tokenId,
       },
       ReturnValues: "NONE",
     };
