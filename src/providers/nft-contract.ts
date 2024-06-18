@@ -1,7 +1,7 @@
-import { BigNumberish, Contract, ethers } from "ethers";
+import { BigNumberish, Contract, ContractEventPayload, ethers } from "ethers";
 import { COLLECTION_ADDRESS, wss_provider } from "../config";
 import { logger } from "../util";
-const _IdToSKU_Cache: { [key: string]: string } = {};
+import { OwnershipService } from "../services/ownership.service";
 
 const contract_address = COLLECTION_ADDRESS;
 
@@ -604,40 +604,46 @@ export const contract = new Contract(
 
 export const Events = {
   Transfer: contract.filters.Transfer(null, null, null),
-  TransferCheck: contract.filters.TransferCheck(null, null, null, null),
-  TxData: contract.filters.TxData(null),
 };
 
-export const Transfer_handler = async (
-  from: string,
-  to: string,
-  id: BigNumberish,
-  transactionHash: string
-) => {
-  logger.info("TRANSFER", {
-    from,
-    to,
-    id,
-    transactionHash,
-  });
+export const Transfer_handler = async (e: ContractEventPayload) => {
+  console.log("Transfer_handler", e);
+  const { transactionHash, blockNumber } = e.log;
+  const { from, to, tokenId } = e.args;
+  try {
+    console.log({
+      from,
+      to,
+      tokenId,
+      transactionHash,
+      blockNumber,
+    });
+    // Get Transaction timestamp from transaction hash
+    const timestamp = await getBlockTimestamp(blockNumber);
+    await OwnershipService.transferOwnership(
+      from,
+      to,
+      tokenId.toString(),
+      timestamp
+    );
+    logger.info("Ownership updated successfully", {
+      from,
+      to,
+      tokenId,
+      transactionHash,
+      blockNumber,
+    });
+  } catch (error) {
+    logger.error("Error updating ownership", error);
+  }
 };
 
-export const TransferCheck_handler = async (
-  calledFunction: string,
-  txSender: string,
-  msgSender: BigNumberish,
-  tokenId: string
-) => {
-  logger.info("TRANSFERCheck", {
-    calledFunction,
-    txSender,
-    msgSender,
-    tokenId,
-  });
+export const getTxData = async (txHash: string) => {
+  const tx = await wss_provider.getTransaction(txHash);
+  return tx ? tx : {};
 };
 
-export const TxData_handler = async (txData: string) => {
-  logger.info("TXDATA", {
-    txData,
-  });
+export const getBlockTimestamp = async (blockNumber: BigNumberish) => {
+  const block = await wss_provider.getBlock(blockNumber);
+  return block ? block.timestamp : 0;
 };
