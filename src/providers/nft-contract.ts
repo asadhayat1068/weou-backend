@@ -607,17 +607,9 @@ export const Events = {
 };
 
 export const Transfer_handler = async (e: ContractEventPayload) => {
-  console.log("Transfer_handler", e);
   const { transactionHash, blockNumber } = e.log;
   const { from, to, tokenId } = e.args;
   try {
-    console.log({
-      from,
-      to,
-      tokenId,
-      transactionHash,
-      blockNumber,
-    });
     // Get Transaction timestamp from transaction hash
     const timestamp = await getBlockTimestamp(blockNumber);
     await OwnershipService.transferOwnership(

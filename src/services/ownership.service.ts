@@ -1,6 +1,7 @@
 import { ZeroAddress } from "ethers";
 import { dynamoDB } from "../config";
 import { BaseService } from "./base-service";
+import { logger } from "../util";
 
 export class OwnershipService extends BaseService {
   /**
@@ -25,7 +26,7 @@ export class OwnershipService extends BaseService {
     try {
       await dynamoDB.put(params).promise();
     } catch (error) {
-      console.log("Error transferring ownership", error);
+      logger.error("Error transferring ownership", error);
       throw new Error("Error transferring ownership");
     }
   }
@@ -42,7 +43,7 @@ export class OwnershipService extends BaseService {
     try {
       await dynamoDB.delete(params).promise();
     } catch (error) {
-      console.log("Error transferring ownership", error);
+      logger.error("Error transferring ownership", error);
       throw new Error("Error transferring ownership");
     }
   }
@@ -69,7 +70,7 @@ export class OwnershipService extends BaseService {
       await this.removeOwnership(from, tokenId);
       await this.addOwnership(to, tokenId, timestamp);
     } catch (error) {
-      console.log("Error transferring ownership", error);
+      logger.error("Error transferring ownership", error);
       throw new Error("Error transferring ownership");
     }
   }
@@ -98,7 +99,7 @@ export class OwnershipService extends BaseService {
       const data = await dynamoDB.query(params).promise();
       return data.Items;
     } catch (error) {
-      console.log("Error getting ownership", error);
+      logger.error("Error getting ownership", error);
       throw new Error("Error getting ownership");
     }
   }
