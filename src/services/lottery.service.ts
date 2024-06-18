@@ -199,4 +199,21 @@ export class LotteryService extends BaseService {
       throw new Error("Error adding sale record");
     }
   }
+
+  public async getSalesByAddress(address: string) {
+    const params = {
+      TableName: "weou",
+      KeyConditionExpression: "pk = :pk",
+      ExpressionAttributeValues: {
+        ":pk": `SALE#${address}`,
+      },
+    };
+    try {
+      const response = await dynamoDB.query(params).promise();
+      return response.Items;
+    } catch (error) {
+      console.log("Error getting sales by address", error);
+      throw new Error("Error getting sales by address");
+    }
+  }
 }
