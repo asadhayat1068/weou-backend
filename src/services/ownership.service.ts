@@ -91,8 +91,8 @@ export class OwnershipService extends BaseService {
         "#sk": "sk",
       },
       ExpressionAttributeValues: {
-        ":pk": `owner#${ownerAddress}`,
-        ":skPrefix": "token#",
+        ":pk": formatKey(`owner#${ownerAddress}`),
+        ":skPrefix": formatKey("token#"),
       },
     };
     try {
