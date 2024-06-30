@@ -35,7 +35,13 @@ morganBody(app, {
   stream: new LoggingStream(),
   filterParameters: ["password", "access_token", "refresh_token", "id_token"],
 });
-app.use(cors());
+const corsOptions = {
+  origin: "*",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  preflightContinue: false,
+  optionsSuccessStatus: 204,
+};
+app.use(cors(corsOptions));
 app.use("/", AppRouter);
 app.use((req, res, next) => next(new NotFoundError()));
 app.use(errorHandler);

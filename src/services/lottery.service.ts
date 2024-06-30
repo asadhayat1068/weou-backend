@@ -14,6 +14,13 @@ export interface LotteryResult {
   };
 }
 
+export const lotteryStatus = {
+  PENDING: "PENDING",
+  PROCESSING: "PROCESSING",
+  CLAIMED: "CLAIMED",
+  FORFEITED: "FORFEITED",
+};
+
 export class LotteryService extends BaseService {
   public async processSale(data: any) {
     const { maker, taker, payment_token, transaction, item } = data?.payload;
@@ -79,6 +86,7 @@ export class LotteryService extends BaseService {
         to,
         result,
         tokenId,
+        status: lotteryStatus.PENDING,
       },
       ReturnValues: "NONE",
     };
@@ -108,6 +116,57 @@ export class LotteryService extends BaseService {
     } catch (error) {
       logger.error("Error getting sales by address", error);
       throw new Error("Error getting sales by address");
+    }
+  }
+
+  public static async getSale(owner: string, txId: string) {
+    const params = {
+      TableName: "weou",
+      Key: {
+        pk: formatKey(`SALE#${owner}`),
+        sk: formatKey(`TX#${txId}`),
+      },
+    };
+    try {
+      const response = await dynamoDB.get(params).promise();
+      return response.Item;
+    } catch (error) {
+      logger.error("Error getting prize", error);
+      throw new Error("Error getting prize");
+    }
+  }
+
+  public static async claimPrize(
+    owner: string,
+    txId: string,
+    level: string,
+    status: string
+  ) {
+    const params = {
+      TableName: "weou",
+      Key: {
+        pk: formatKey(`SALE#${owner}`),
+        sk: formatKey(`TX#${txId}`),
+      },
+      // Update status to PROCESSING and set prizeClaimed to true
+      UpdateExpression: `set #saleResult.${level}.prizeClaimed = :prizeClaimed, #saleStatus = :status`,
+      ExpressionAttributeValues: {
+        ":prizeClaimed": true,
+        ":status": status,
+      },
+      ExpressionAttributeNames: {
+        "#saleStatus": "status",
+        "#saleResult": "result",
+      },
+    };
+    try {
+      await dynamoDB.update(params).promise();
+    } catch (error) {
+      console.log("----");
+      console.log(error);
+      console.log("----");
+      // logger.error("Error claiming prize", error);
+      throw new Error("Error claiming prize");
     }
   }
 }
