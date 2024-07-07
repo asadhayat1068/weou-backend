@@ -35,8 +35,8 @@ export class OwnershipService extends BaseService {
     const params = {
       TableName: "weou",
       Key: {
-        pk: `owner#${from}`,
-        sk: `token#${tokenId}`,
+        pk: formatKey(`owner#${from}`),
+        sk: formatKey(`token#${tokenId}`),
       },
       ReturnValues: "NONE",
     };

@@ -604,9 +604,11 @@ export const contract = new Contract(
 
 export const Events = {
   Transfer: contract.filters.Transfer(null, null, null),
+  // Transfer2: contract.getEvent("Transfer"),
 };
 
 export const Transfer_handler = async (e: ContractEventPayload) => {
+  console.log("Transfer Event", e);
   const { transactionHash, blockNumber } = e.log;
   const { from, to, tokenId } = e.args;
   try {
