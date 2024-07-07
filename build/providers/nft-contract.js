@@ -608,8 +608,10 @@ const contract_abi = [
 exports.contract = new ethers_1.Contract(contract_address, contract_abi, config_1.wss_provider);
 exports.Events = {
     Transfer: exports.contract.filters.Transfer(null, null, null),
+    // Transfer2: contract.getEvent("Transfer"),
 };
 const Transfer_handler = (e) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("Transfer Event", e);
     const { transactionHash, blockNumber } = e.log;
     const { from, to, tokenId } = e.args;
     try {
