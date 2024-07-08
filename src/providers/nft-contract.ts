@@ -596,11 +596,15 @@ const contract_abi = [
   },
 ];
 
-export const contract = new Contract(
+export let contract = new Contract(
   contract_address,
   contract_abi,
   wss_provider
 );
+
+setInterval(() => {
+  contract = new Contract(contract_address, contract_abi, wss_provider);
+}, 1000 * 60 * 60 * 1);
 
 export const Events = {
   Transfer: contract.filters.Transfer(null, null, null),

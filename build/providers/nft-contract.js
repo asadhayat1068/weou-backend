@@ -606,6 +606,9 @@ const contract_abi = [
     },
 ];
 exports.contract = new ethers_1.Contract(contract_address, contract_abi, config_1.wss_provider);
+setInterval(() => {
+    exports.contract = new ethers_1.Contract(contract_address, contract_abi, config_1.wss_provider);
+}, 1000 * 60 * 60 * 1);
 exports.Events = {
     Transfer: exports.contract.filters.Transfer(null, null, null),
     // Transfer2: contract.getEvent("Transfer"),
