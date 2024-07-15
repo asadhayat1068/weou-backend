@@ -32,7 +32,7 @@ const lottery_service_1 = require("./services/lottery.service");
 const lotteryService = new lottery_service_1.LotteryService();
 // WeOu contract Events Listeners
 nftCollection.contract.on(nftCollection.Events.Transfer, nftCollection.Transfer_handler);
-providers_1.OpenSeaClient.onItemSold("cssnftcollection-2", (item) => {
+providers_1.OpenSeaClient.onItemSold("weou", (item) => {
     lotteryService.processSale(item);
 });
 // Start the server

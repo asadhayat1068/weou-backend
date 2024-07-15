@@ -5,7 +5,7 @@ import { OPENSEA_API_KEY } from "../config";
 
 const OpenSeaClient = new OpenSeaStreamClient({
   token: OPENSEA_API_KEY,
-  network: Network.TESTNET,
+  network: Network.MAINNET,
   connectOptions: {
     transport: WebSocket,
     sessionStorage: LocalStorage,

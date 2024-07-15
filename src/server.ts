@@ -13,7 +13,7 @@ nftCollection.contract.on(
   nftCollection.Transfer_handler
 );
 
-OpenSeaClient.onItemSold("cssnftcollection-2", (item) => {
+OpenSeaClient.onItemSold("weou", (item) => {
   lotteryService.processSale(item);
 });
 

@@ -7,7 +7,7 @@ const node_localstorage_1 = require("node-localstorage");
 const config_1 = require("../config");
 const OpenSeaClient = new stream_js_1.OpenSeaStreamClient({
     token: config_1.OPENSEA_API_KEY,
-    network: stream_js_1.Network.TESTNET,
+    network: stream_js_1.Network.MAINNET,
     connectOptions: {
         transport: ws_1.WebSocket,
         sessionStorage: node_localstorage_1.LocalStorage,
