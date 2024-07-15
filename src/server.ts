@@ -4,8 +4,6 @@ import { logger } from "./util";
 import * as nftCollection from "./providers/nft-contract";
 import { OpenSeaClient } from "./providers";
 import { LotteryService } from "./services/lottery.service";
-import { dummySale } from "./config/test";
-
 const lotteryService = new LotteryService();
 
 // WeOu contract Events Listeners
@@ -14,10 +12,6 @@ nftCollection.contract.on(
   nftCollection.Events.Transfer,
   nftCollection.Transfer_handler
 );
-
-lotteryService.processSale(dummySale).then((result) => {
-  console.log("Dummy Sale Result: ", { result });
-});
 
 OpenSeaClient.onItemSold("cssnftcollection-2", (item) => {
   lotteryService.processSale(item);
