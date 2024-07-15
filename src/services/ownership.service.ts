@@ -103,4 +103,47 @@ export class OwnershipService extends BaseService {
       throw new Error("Error getting ownership");
     }
   }
+
+  public static async getTokenOwners(tokenId: number) {
+    // Get current token owners list
+    const params = {
+      TableName: "weou",
+      Key: {
+        pk: formatKey(`token#${tokenId}`),
+        sk: formatKey(`ownersList#${tokenId}`),
+      },
+    };
+    const response = await dynamoDB.get(params).promise();
+    return response.Item || { owners: [] };
+  }
+
+  public static async addToTokenOwners(tokenId: number, walletAddress: string) {
+    // Get current token owners list
+    let owners = await this.getTokenOwners(tokenId);
+    owners = owners.owners || [];
+    // Add new owner to the list
+    do {
+      const i = owners.indexOf(walletAddress);
+      if (i !== -1) {
+        owners.splice(i, 1);
+      } else {
+        break;
+      }
+    } while (true);
+    owners.push(walletAddress);
+    // Update owners list
+    const params = {
+      TableName: "weou",
+      Key: {
+        pk: formatKey(`token#${tokenId}`),
+        sk: formatKey(`ownersList#${tokenId}`),
+      },
+      UpdateExpression: "set owners = :owners",
+      ExpressionAttributeValues: {
+        ":owners": owners,
+      },
+      ReturnValues: "NONE",
+    };
+    await dynamoDB.update(params).promise();
+  }
 }

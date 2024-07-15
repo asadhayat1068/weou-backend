@@ -13,6 +13,7 @@ exports.LotteryController = void 0;
 const util_1 = require("../../util");
 const lottery_service_1 = require("../../services/lottery.service");
 const siwe_service_1 = require("../../services/siwe-service");
+const config_1 = require("../../config");
 class LotteryController {
     static getSales(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -114,6 +115,22 @@ class LotteryController {
                 const resp = new util_1.InternalErrorResponse(res, "Error claiming prize");
                 return resp.send();
             }
+        });
+    }
+    static setRands(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            (0, config_1.updateSecrets)();
+            const response = new util_1.SuccessResponse(res, "Rands updated successfully.");
+            return response.send();
+        });
+    }
+    static getRands(req, res) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const response = new util_1.SuccessResponse(res, "Rands fetched successfully.", {
+                SECRET_WALLET: config_1.SECRET_WALLET,
+                SECRET_TRANSACTION: config_1.SECRET_TRANSACTION,
+            });
+            return response.send();
         });
     }
 }

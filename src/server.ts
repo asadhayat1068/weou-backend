@@ -1,12 +1,10 @@
 import "reflect-metadata";
 import { app } from "./app";
 import { logger } from "./util";
-import { wss_provider } from "./config";
 import * as nftCollection from "./providers/nft-contract";
 import { OpenSeaClient } from "./providers";
 import { LotteryService } from "./services/lottery.service";
-import { DataSource } from "typeorm";
-import { OwnershipService } from "./services/ownership.service";
+import { dummySale } from "./config/test";
 
 const lotteryService = new LotteryService();
 
@@ -17,16 +15,8 @@ nftCollection.contract.on(
   nftCollection.Transfer_handler
 );
 
-// OwnershipService.getTokensByOwner(
-//   "0xFf6b07070a9C34Bf9955D55Bd360308be1009735"
-// ).then((tokens) => {
-//   console.log({ tokens });
-// });
-
-LotteryService.getSalesByAddress(
-  "0xff6b07070a9c34bf9955d55bd360308be1009735"
-).then((sales) => {
-  console.log({ sales });
+lotteryService.processSale(dummySale).then((result) => {
+  console.log("Dummy Sale Result: ", { result });
 });
 
 OpenSeaClient.onItemSold("cssnftcollection-2", (item) => {

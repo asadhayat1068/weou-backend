@@ -1,7 +1,16 @@
-import { SECRET_TRANSACTION, SECRET_WALLET, dynamoDB } from "../config";
+import {
+  L1_LOTTERY_ENABLED,
+  L2_LOTTERY_ENABLED,
+  SECRET_TRANSACTION,
+  SECRET_WALLET,
+  dynamoDB,
+  updateSecrets,
+} from "../config";
 import { logger } from "../util";
 import { formatKey } from "../util/helpers";
 import { BaseService } from "./base-service";
+import { OwnershipService } from "./ownership.service";
+import { UserService } from "./user.service";
 
 export interface LotteryResult {
   l1: {
@@ -23,7 +32,8 @@ export const lotteryStatus = {
 
 export class LotteryService extends BaseService {
   public async processSale(data: any) {
-    const { maker, taker, payment_token, transaction, item } = data?.payload;
+    const { maker, taker, payment_token, transaction, item, protocol_data } =
+      data?.payload;
     const txDate = new Date(transaction.timestamp).getTime();
     const timestamp = Math.floor(txDate / 1000);
     const tokenId = item.nft_id.split("/")[2];
@@ -31,7 +41,25 @@ export class LotteryService extends BaseService {
     const buyerAddress = taker.address;
     const sellerAddress = maker.address;
     const transactionHash = transaction.hash;
+
+    // Update Royalty shares
+    const royaltyData = protocol_data.parameters.consideration;
+    if (royaltyData.length > 2) {
+      royaltyData.shift();
+      royaltyData.shift();
+      const royaltyAmount = royaltyData[0].endAmount;
+      // Process royalty
+      await UserService.awardRoyaltyToOwners(
+        tokenId,
+        royaltyAmount,
+        transactionHash
+      );
+    }
+
+    // Check Winner
     const result = this.checkWinner(buyerAddress, transactionHash);
+
+    // Add Sale Record
     await this.addSaleRecord(
       Number(tokenId),
       transactionHash,
@@ -54,13 +82,20 @@ export class LotteryService extends BaseService {
         prizeClaimed: false,
       },
     };
+    // Check L2 winner
     if (
-      buyerSecret === SECRET_WALLET &&
-      transactionSecret === SECRET_TRANSACTION
+      formatKey(buyerSecret) === formatKey(SECRET_WALLET) &&
+      formatKey(transactionSecret) === formatKey(SECRET_TRANSACTION) &&
+      L1_LOTTERY_ENABLED
     ) {
+      updateSecrets();
       result.l1.winner = true;
       return result;
-    } else if (buyerSecret === SECRET_WALLET) {
+    } else if (
+      formatKey(buyerSecret) === formatKey(SECRET_WALLET) &&
+      L2_LOTTERY_ENABLED
+    ) {
+      updateSecrets();
       result.l2.winner = true;
       return result;
     }
@@ -96,6 +131,7 @@ export class LotteryService extends BaseService {
       logger.error("Error adding sale record", error);
       throw new Error("Error adding sale record");
     }
+    await OwnershipService.addToTokenOwners(tokenId, to);
   }
 
   public static async getSalesByAddress(address: string) {
@@ -109,7 +145,6 @@ export class LotteryService extends BaseService {
         ":pk": formatKey(`SALE#${address}`),
       },
     };
-    console.log(params);
     try {
       const response = await dynamoDB.query(params).promise();
       return response.Items;
@@ -162,9 +197,6 @@ export class LotteryService extends BaseService {
     try {
       await dynamoDB.update(params).promise();
     } catch (error) {
-      console.log("----");
-      console.log(error);
-      console.log("----");
       // logger.error("Error claiming prize", error);
       throw new Error("Error claiming prize");
     }

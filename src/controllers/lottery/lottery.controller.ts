@@ -7,6 +7,7 @@ import {
 } from "../../util";
 import { LotteryService, lotteryStatus } from "../../services/lottery.service";
 import { SiweService } from "../../services/siwe-service";
+import { SECRET_TRANSACTION, SECRET_WALLET, updateSecrets } from "../../config";
 
 export class LotteryController {
   static async getSales(req: Request, res: Response) {
@@ -124,5 +125,19 @@ export class LotteryController {
       const resp = new InternalErrorResponse(res, "Error claiming prize");
       return resp.send();
     }
+  }
+
+  static async setRands(req: Request, res: Response) {
+    updateSecrets();
+    const response = new SuccessResponse(res, "Rands updated successfully.");
+    return response.send();
+  }
+
+  static async getRands(req: Request, res: Response) {
+    const response = new SuccessResponse(res, "Rands fetched successfully.", {
+      SECRET_WALLET,
+      SECRET_TRANSACTION,
+    });
+    return response.send();
   }
 }

@@ -10,3 +10,5 @@ exports.LotteryRouter = express_1.default.Router();
 exports.LotteryRouter.post("/sales", [lottery_controller_1.LotteryController.getSales]);
 exports.LotteryRouter.get("/prize/:owner/:txId/:level", [lottery_controller_1.LotteryController.getPrize]);
 exports.LotteryRouter.post("/prize/claim", [lottery_controller_1.LotteryController.claimPrize]);
+// LotteryRouter.get("/prize/set_rands", [LotteryController.setRands]);
+// LotteryRouter.get("/prize/get_rands", [LotteryController.getRands]);

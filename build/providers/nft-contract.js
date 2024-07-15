@@ -614,7 +614,6 @@ exports.Events = {
     // Transfer2: contract.getEvent("Transfer"),
 };
 const Transfer_handler = (e) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("Transfer Event", e);
     const { transactionHash, blockNumber } = e.log;
     const { from, to, tokenId } = e.args;
     try {

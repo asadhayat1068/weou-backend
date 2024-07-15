@@ -18,13 +18,11 @@ class SIWEController {
         let nonce;
         const visited = (_b = (_a = req.session) === null || _a === void 0 ? void 0 : _a.visited) !== null && _b !== void 0 ? _b : false;
         if (!visited) {
-            console.log("Not visited");
             req.session.visited = true;
             nonce = (0, siwe_1.generateNonce)();
             req.session.nonce = nonce;
         }
         else {
-            console.log("Visited");
             nonce = req.session.nonce;
         }
         const response = new util_1.SuccessResponse(res, "Nonce.", {
@@ -35,13 +33,11 @@ class SIWEController {
     static verifyMessage(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const { message, signature, account } = req.body;
-            // console.log({ message, signature, account });
             try {
                 const siweMessage = new siwe_1.SiweMessage(message);
                 const v = yield siweMessage.verify({
                     signature,
                 });
-                console.log("Verify Result:", v);
                 //   res.send(true);
                 const response = new util_1.SuccessResponse(res, "Verify.", {
                     message,

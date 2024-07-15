@@ -14,6 +14,8 @@ const config_1 = require("../config");
 const util_1 = require("../util");
 const helpers_1 = require("../util/helpers");
 const base_service_1 = require("./base-service");
+const ownership_service_1 = require("./ownership.service");
+const user_service_1 = require("./user.service");
 exports.lotteryStatus = {
     PENDING: "PENDING",
     PROCESSING: "PROCESSING",
@@ -23,14 +25,25 @@ exports.lotteryStatus = {
 class LotteryService extends base_service_1.BaseService {
     processSale(data) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { maker, taker, payment_token, transaction, item } = data === null || data === void 0 ? void 0 : data.payload;
+            const { maker, taker, payment_token, transaction, item, protocol_data } = data === null || data === void 0 ? void 0 : data.payload;
             const txDate = new Date(transaction.timestamp).getTime();
             const timestamp = Math.floor(txDate / 1000);
             const tokenId = item.nft_id.split("/")[2];
             const buyerAddress = taker.address;
             const sellerAddress = maker.address;
             const transactionHash = transaction.hash;
+            // Update Royalty shares
+            const royaltyData = protocol_data.parameters.consideration;
+            if (royaltyData.length > 2) {
+                royaltyData.shift();
+                royaltyData.shift();
+                const royaltyAmount = royaltyData[0].endAmount;
+                // Process royalty
+                yield user_service_1.UserService.awardRoyaltyToOwners(tokenId, royaltyAmount, transactionHash);
+            }
+            // Check Winner
             const result = this.checkWinner(buyerAddress, transactionHash);
+            // Add Sale Record
             yield this.addSaleRecord(Number(tokenId), transactionHash, sellerAddress, buyerAddress, result);
         });
     }
@@ -47,12 +60,17 @@ class LotteryService extends base_service_1.BaseService {
                 prizeClaimed: false,
             },
         };
-        if (buyerSecret === config_1.SECRET_WALLET &&
-            transactionSecret === config_1.SECRET_TRANSACTION) {
+        // Check L2 winner
+        if ((0, helpers_1.formatKey)(buyerSecret) === (0, helpers_1.formatKey)(config_1.SECRET_WALLET) &&
+            (0, helpers_1.formatKey)(transactionSecret) === (0, helpers_1.formatKey)(config_1.SECRET_TRANSACTION) &&
+            config_1.L1_LOTTERY_ENABLED) {
+            (0, config_1.updateSecrets)();
             result.l1.winner = true;
             return result;
         }
-        else if (buyerSecret === config_1.SECRET_WALLET) {
+        else if ((0, helpers_1.formatKey)(buyerSecret) === (0, helpers_1.formatKey)(config_1.SECRET_WALLET) &&
+            config_1.L2_LOTTERY_ENABLED) {
+            (0, config_1.updateSecrets)();
             result.l2.winner = true;
             return result;
         }
@@ -83,6 +101,7 @@ class LotteryService extends base_service_1.BaseService {
                 util_1.logger.error("Error adding sale record", error);
                 throw new Error("Error adding sale record");
             }
+            yield ownership_service_1.OwnershipService.addToTokenOwners(tokenId, to);
         });
     }
     static getSalesByAddress(address) {
@@ -97,7 +116,6 @@ class LotteryService extends base_service_1.BaseService {
                     ":pk": (0, helpers_1.formatKey)(`SALE#${address}`),
                 },
             };
-            console.log(params);
             try {
                 const response = yield config_1.dynamoDB.query(params).promise();
                 return response.Items;
@@ -150,9 +168,6 @@ class LotteryService extends base_service_1.BaseService {
                 yield config_1.dynamoDB.update(params).promise();
             }
             catch (error) {
-                console.log("----");
-                console.log(error);
-                console.log("----");
                 // logger.error("Error claiming prize", error);
                 throw new Error("Error claiming prize");
             }

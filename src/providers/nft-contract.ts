@@ -612,7 +612,6 @@ export const Events = {
 };
 
 export const Transfer_handler = async (e: ContractEventPayload) => {
-  console.log("Transfer Event", e);
   const { transactionHash, blockNumber } = e.log;
   const { from, to, tokenId } = e.args;
   try {

@@ -114,5 +114,51 @@ class OwnershipService extends base_service_1.BaseService {
             }
         });
     }
+    static getTokenOwners(tokenId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // Get current token owners list
+            const params = {
+                TableName: "weou",
+                Key: {
+                    pk: (0, util_1.formatKey)(`token#${tokenId}`),
+                    sk: (0, util_1.formatKey)(`ownersList#${tokenId}`),
+                },
+            };
+            const response = yield config_1.dynamoDB.get(params).promise();
+            return response.Item || { owners: [] };
+        });
+    }
+    static addToTokenOwners(tokenId, walletAddress) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // Get current token owners list
+            let owners = yield this.getTokenOwners(tokenId);
+            owners = owners.owners || [];
+            // Add new owner to the list
+            do {
+                const i = owners.indexOf(walletAddress);
+                if (i !== -1) {
+                    owners.splice(i, 1);
+                }
+                else {
+                    break;
+                }
+            } while (true);
+            owners.push(walletAddress);
+            // Update owners list
+            const params = {
+                TableName: "weou",
+                Key: {
+                    pk: (0, util_1.formatKey)(`token#${tokenId}`),
+                    sk: (0, util_1.formatKey)(`ownersList#${tokenId}`),
+                },
+                UpdateExpression: "set owners = :owners",
+                ExpressionAttributeValues: {
+                    ":owners": owners,
+                },
+                ReturnValues: "NONE",
+            };
+            yield config_1.dynamoDB.update(params).promise();
+        });
+    }
 }
 exports.OwnershipService = OwnershipService;
